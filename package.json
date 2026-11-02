@@ -1,0 +1,25 @@
+{
+  "name": "estudio-juridico-formulario-whatsapp",
+  "version": "4.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Backend Fastify para formulario web, evaluación jurídica con Groq y correos SMTP. Sin asistente conversacional.",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "check": "node scripts/check.mjs",
+    "test": "node --import ./tests/test-setup.mjs --test tests/*.test.mjs",
+    "test:form": "node --import ./tests/test-setup.mjs --test tests/form-legal-review-context.test.mjs tests/form-review-delivery-offline.test.mjs tests/no-chat-whatsapp.test.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "nodemailer": "^7.0.6",
+    "zod": "^4.1.11",
+    "fastify": "^5.6.0",
+    "@fastify/cors": "^11.1.0",
+    "@fastify/helmet": "^13.0.0"
+  }
+}
