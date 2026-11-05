@@ -1,9 +1,10 @@
 FROM node:22.22.3-alpine
 WORKDIR /app
 ENV NODE_ENV=production
-COPY package*.json ./
-RUN npm install --omit=dev
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+COPY .env.defaults ./.env.defaults
 COPY src ./src
 COPY scripts ./scripts
-EXPOSE 3001
+EXPOSE 8080
 CMD ["npm", "start"]

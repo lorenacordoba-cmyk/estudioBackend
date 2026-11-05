@@ -1,5 +1,8 @@
-node_modules
+node_modules/
 .env
+.env.example
+.git/
+coverage/
+tests/
 npm-debug.log*
-.git
-coverage
+.DS_Store
