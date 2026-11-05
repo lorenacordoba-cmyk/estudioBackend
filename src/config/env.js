@@ -1,5 +1,15 @@
-import 'dotenv/config';
+import { config } from 'dotenv';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
+
+const backendDirectory = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+config({
+  path: [
+    resolve(backendDirectory, '.env'),
+    resolve(backendDirectory, '.env.defaults')
+  ]
+});
 
 const boolFromString = z.string().default('false').transform(v => v.toLowerCase() === 'true');
 
