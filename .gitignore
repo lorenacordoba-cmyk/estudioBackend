@@ -1,4 +1,9 @@
 node_modules/
+# No publicar credenciales locales ni archivos de entorno con secretos.
 .env
+.env.*
+!.env.defaults
+!.env.production.defaults
+!.env.example
 npm-debug.log*
 .DS_Store

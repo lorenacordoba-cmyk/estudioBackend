@@ -8,8 +8,10 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "dev": "node --watch src/server.js",
-    "start": "node src/server.js",
+    "dev": "node --watch scripts/start.mjs development",
+    "start:local": "node scripts/start.mjs development",
+    "start": "node scripts/start.mjs production",
+    "start:prod": "node scripts/start.mjs production",
     "check": "node scripts/check.mjs",
     "test": "node --import ./tests/test-setup.mjs --test tests/*.test.mjs",
     "test:form": "node --import ./tests/test-setup.mjs --test tests/form-legal-review-context.test.mjs tests/form-review-delivery-offline.test.mjs tests/no-chat-whatsapp.test.mjs"

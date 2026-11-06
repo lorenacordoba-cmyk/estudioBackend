@@ -4,11 +4,15 @@ import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 
 const backendDirectory = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Las variables inyectadas por Cloud Run/Secret Manager siempre tienen prioridad.
+// .env solo se consulta en desarrollo local: nunca se carga en producción.
+if (!isProduction && process.env.NODE_ENV !== 'test') {
+  config({ path: resolve(backendDirectory, '.env') });
+}
 config({
-  path: [
-    resolve(backendDirectory, '.env'),
-    resolve(backendDirectory, '.env.defaults')
-  ]
+  path: resolve(backendDirectory, isProduction ? '.env.production.defaults' : '.env.defaults')
 });
 
 const boolFromString = z.string().default('false').transform(v => v.toLowerCase() === 'true');

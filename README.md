@@ -13,10 +13,17 @@ La evaluación es posterior y sus reintentos viven en memoria; pueden perderse s
 
 ## Configuración y ejecución
 
-- `npm install`
-- Copiar `.env.example` a `.env` y configurar Groq, SMTP, `SECURITY_HASH_SECRET` y Turnstile para producción.
-- `npm run dev` o `npm start`.
-- `npm run check` comprueba sintaxis; `npm test` ejecuta pruebas offline.
+- Instalar: `npm ci`.
+- **Desarrollo local:** `.env.defaults` contiene valores públicos y `npm run dev` inicia en modo `development` con recarga automática. También está `npm run start:local` sin watch.
+- **Credenciales locales:** copiar `.env.example` a `.env` y completar `GROQ_API_KEY`, `SECURITY_HASH_SECRET`, `SMTP_USER`, `SMTP_PASS`, etc. `.env` NO se sube a Git; en desarrollo sus valores prevalecen sobre `.env.defaults`.
+- **Producción (Google Cloud Run):** `npm start` / `npm run start:prod` activa `NODE_ENV=production` y carga exclusivamente `.env.production.defaults` (valores públicos). Cloud Run entrega `PORT` y las credenciales por variables de entorno/Secret Manager, que **tienen prioridad** sobre el archivo.
+- `TURNSTILE_SECRET_KEY` **no se guarda** en `.env.production.defaults`; es un secreto de Cloud Run vinculado desde Secret Manager. Se necesita además `GROQ_API_KEY`, `SECURITY_HASH_SECRET`, `SMTP_USER` y `SMTP_PASS` en Cloud Run.
+- El Dockerfile copia `.env.production.defaults` y utiliza `npm start`; el despliegue por Buildpacks también usa `npm start`.
+- `npm run check` verifica sintaxis y `npm test` ejecuta pruebas offline.
+
+Valores de Turnstile y origen en producción: `TURNSTILE_ENABLED=true`, `TURNSTILE_EXPECTED_HOSTNAME=lorenacordobaabogada.com.ar`, `TURNSTILE_CONTACT_ACTION=legal_contact_form`, `FRONTEND_ORIGIN=https://lorenacordobaabogada.com.ar`.
+
+**Nota:** si en Cloud Run existe una variable de entorno con alguno de esos mismos nombres, esa variable tiene prioridad sobre `.env.production.defaults`. Para administrar dichos valores desde el repositorio, eliminá las variables duplicadas de Cloud Run, dejando allí las claves privadas.
 
 ## Endpoints
 
