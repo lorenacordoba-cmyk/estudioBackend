@@ -5,16 +5,17 @@
   "type": "module",
   "description": "Backend Fastify para formulario web, evaluación jurídica con Groq y correos SMTP. Sin asistente conversacional.",
   "engines": {
-    "node": ">=22.0.0"
+    "node": "22.x"
   },
   "scripts": {
-    "dev": "node --watch scripts/start.mjs development",
-    "start:local": "node scripts/start.mjs development",
-    "start": "node scripts/start.mjs production",
-    "start:prod": "node scripts/start.mjs production",
+    "dev": "node --watch --env-file=.env.defaults --env-file-if-exists=.env src/server.js",
+    "start:local": "node --env-file=.env.defaults --env-file-if-exists=.env src/server.js",
+    "start": "node --env-file=.env.production.defaults src/server.js",
+    "start:prod": "node --env-file=.env.production.defaults src/server.js",
     "check": "node scripts/check.mjs",
     "test": "node --import ./tests/test-setup.mjs --test tests/*.test.mjs",
-    "test:form": "node --import ./tests/test-setup.mjs --test tests/form-legal-review-context.test.mjs tests/form-review-delivery-offline.test.mjs tests/no-chat-whatsapp.test.mjs"
+    "test:form": "node --import ./tests/test-setup.mjs --test tests/form-legal-review-context.test.mjs tests/form-review-delivery-offline.test.mjs tests/no-chat-whatsapp.test.mjs",
+    "verify:deploy": "node scripts/verify-deploy.mjs"
   },
   "dependencies": {
     "dotenv": "^16.6.1",

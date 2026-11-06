@@ -33,3 +33,7 @@ Valores de Turnstile y origen en producción: `TURNSTILE_ENABLED=true`, `TURNSTI
 - `GET /api/ops/metrics`: JSON de métricas, requiere cabecera `x-ops-token`.
 
 El enlace de WhatsApp (`https://wa.me/5491131076843`) está en Angular. **No requiere WhatsApp Business API ni genera llamadas a este backend.**
+
+### Despliegue Google Cloud Run (actualización de arranque)
+
+`npm start` inicia directamente `src/server.js` con `.env.production.defaults`, sin depender de `scripts/start.mjs`. La versión de Node para Buildpacks se limita a 22.x. Antes del push: `npm run check` y `npm run verify:deploy`. Consultá `DEPLOY-CLOUD-RUN.md`.

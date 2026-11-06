@@ -8,7 +8,7 @@
 | `npm run start:local` | development | `.env.defaults` | `.env` local, opcional |
 | `npm start` / `npm run start:prod` | production | `.env.production.defaults` | variables de Cloud Run/Secret Manager |
 
-`package.json` usa `scripts/start.mjs` para seleccionar NODE_ENV, compatible con Windows y Linux. El archivo `src/config/env.js` no carga `.env` cuando NODE_ENV es production. Las variables definidas por Cloud Run siempre tienen prioridad sobre los defaults versionados.
+`package.json` inicia directamente `src/server.js`, usando los argumentos nativos `--env-file` de Node 22. **El arranque de producción ya no depende de `scripts/start.mjs`** (ausente en el último deploy de GitHub). El archivo `src/config/env.js` no carga `.env` cuando NODE_ENV es production. Las variables definidas por Cloud Run y Secret Manager siempre tienen prioridad sobre los defaults versionados.
 
 ## Configuración que queda versionada para producción
 
@@ -36,6 +36,8 @@ También se conservan los demás parámetros públicos que estaban en `.env.defa
 ## Compilación y despliegue
 
 - Repositorio GitHub con `package.json`, `package-lock.json`, `.env.production.defaults`, `src/` y `scripts/` directamente en la raíz.
+- `package.json` fija Node **22.x** para evitar que Buildpacks elija automáticamente Node 26. `.nvmrc` fija 22.22.3 para desarrollo local.
+- Ejecutá `npm run verify:deploy` antes de hacer el commit: comprueba rutas de arranque, archivos de producción, Node y ausencia de secretos en los defaults.
 - **Cloud Buildpacks (configuración actual):** mantené el activador si ya construye y publica. El `npm start` actualizado carga producción; no hace falta cambiar el tipo de compilación para cargar estos defaults.
 - **Dockerfile (alternativa ya preparada):** instala con `npm ci --omit=dev`, copia `.env.production.defaults`, y ejecuta `npm start`. Cambiar Cloud Build a Dockerfile puede requerir pasos adicionales para desplegar la imagen en Cloud Run; no cambies el activador existente solo por esta modificación.
 - Servicio Cloud Run: `estudio-juridico-api`, región `southamerica-east1`, puerto `8080` (Cloud Run inyecta `PORT`), acceso público según el diseño de tu API.
@@ -43,13 +45,31 @@ También se conservan los demás parámetros públicos que estaban en `.env.defa
 
 ## Verificación
 
-1. `npm run check`: control de sintaxis.
-2. Hacer push a `main`; comprobar que Cloud Build termina y la revisión está activa.
-3. Consultar `GET https://<tu-servicio-run-app>/api/health` y verificar `ok: true`.
-4. Si la revisión no inicia, mirar los **logs del contenedor** para identificar la variable faltante.
+1. `npm run check` y `npm run verify:deploy`: controles locales sin llamadas externas.
+2. Comprobá que `src/server.js` y `.env.production.defaults` estén incluidos en el **commit de GitHub** (no alcanza con que existan en tu carpeta local).
+3. Hacer push a `main`; comprobar que Cloud Build termina y la revisión está activa.
+4. Consultar `GET https://<tu-servicio-run-app>/api/health` y verificar `ok: true`.
+5. Si la revisión no inicia, mirar los **logs del contenedor** para identificar la variable faltante.
 
 ## Limitación funcional que no se modificó
 
 La evaluación Groq y el segundo email al estudio se ejecutan después de responder HTTP 201, con cola en memoria. En Cloud Run la tarea podría interrumpirse por escalado a cero o reinicios. Resolverlo requiere otra decisión de arquitectura; no se alteró en este cambio.
 
 No enviar la Secret Key ni valores de `.env` en capturas. Si alguna clave privada fue versionada previamente en GitHub, conviene rotarla.
+
+## Cómo actualizar GitHub sin perder archivos
+
+Descomprimí este ZIP sobre el repositorio local `estudioBackend` (sin copiar una carpeta contenedora). Desde la raíz donde está `package.json`, usá:
+
+```bash
+npm run check
+npm run verify:deploy
+git add -A
+git status --short
+git commit -m "Fix Cloud Run startup and production defaults"
+git push origin main
+```
+
+En `git status --short` deben aparecer las modificaciones de `package.json`, `package-lock.json` y el nuevo verificador, y confirmar que `.env.production.defaults` está versionado. Si Git ignora archivos por configuración global, verificá con `git check-ignore -v <ruta>` antes de continuar. **No subas `.env` con credenciales privadas.**
+
+El activador de Cloud Build puede mantenerse en **Buildpacks con despliegue automático**: no hace falta cambiarlo a la opción Dockerfile. Si modificás más adelante variables de producción en Cloud Run, esos valores tendrán prioridad sobre los archivos del repositorio.
